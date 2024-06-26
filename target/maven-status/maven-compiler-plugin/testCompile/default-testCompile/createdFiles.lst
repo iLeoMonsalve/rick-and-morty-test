@@ -1,6 +1,0 @@
-com/example/leonel/test/infrastructure/primary/controller/RymControllerTest.class
-com/example/leonel/test/infrastructure/secondary/http/LocationRestAdapterTest.class
-com/example/leonel/test/infrastructure/config/BeanConfigurationTest.class
-com/example/leonel/test/infrastructure/secondary/http/CharacterRestAdapterTest.class
-com/example/leonel/test/core/service/GetCharacterServiceImplTest.class
-com/example/leonel/test/TestApplicationTests.class

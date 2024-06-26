@@ -9,10 +9,10 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
     <groupId>com.example.leonel</groupId>
-    <artifactId>rick-and-morty</artifactId>
+    <artifactId>rick-and-morty-test</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>rick-and-morty</name>
-    <description>rick-and-morty</description>
+    <name>rick-and-morty-test</name>
+    <description>rick-and-morty-test</description>
     <url/>
     <licenses>
         <license/>
