@@ -30,5 +30,5 @@ Para ejecutar la aplicación localmente, puedes usar el siguiente comando:
 ```bash
 mvn spring-boot:run
 ```
-- La aplicacion va a correr en la siguiente url 'http://localhost:8080'
-- Para obtener la informacion de algun personaje tienes que hacer un metodo GET a la siguiente URL '/api/v1/character/{id}'
+- La aplicación va a correr en la siguiente url 'http://localhost:8080'
+- Para obtener la información de algún personaje tienes que hacer un metodo GET a la siguiente URL '/api/v1/character/{id}'
