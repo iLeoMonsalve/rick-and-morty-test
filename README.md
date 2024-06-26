@@ -1,2 +1,1 @@
-# rick-and-morty-test
-Technical test 
+# rick-and-morty

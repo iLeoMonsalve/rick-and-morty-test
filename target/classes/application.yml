@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: "rick-and-morty"
+url:
+  url-character: "https://rickandmortyapi.com/api/character/"
