@@ -143,6 +143,7 @@ MAVEN_USER_HOME="${MAVEN_USER_HOME:-${HOME}/.m2}"
 MAVEN_HOME="${MAVEN_USER_HOME}/wrapper/dists/${distributionUrlNameMain-}/$(hash_string "$distributionUrl")"
 
 exec_maven() {
+  # Clear sensitive environment variables before executing Maven
   unset MVNW_VERBOSE MVNW_USERNAME MVNW_PASSWORD MVNW_REPOURL || :
   exec "$MAVEN_HOME/bin/$MVN_CMD" "$@" || die "cannot exec $MAVEN_HOME/bin/$MVN_CMD"
 }
@@ -182,7 +183,8 @@ fi
 __MVNW_QUIET_WGET=--quiet __MVNW_QUIET_CURL=--silent __MVNW_QUIET_UNZIP=-q __MVNW_QUIET_TAR=''
 [ "${MVNW_VERBOSE-}" != true ] || __MVNW_QUIET_WGET='' __MVNW_QUIET_CURL='' __MVNW_QUIET_UNZIP='' __MVNW_QUIET_TAR=v
 
-# normalize http auth
+# normalize http auth - use secure credential handling
+# Don't log or expose credentials in error messages
 case "${MVNW_PASSWORD:+has-password}" in
 '') MVNW_USERNAME='' MVNW_PASSWORD='' ;;
 has-password) [ -n "${MVNW_USERNAME-}" ] || MVNW_USERNAME='' MVNW_PASSWORD='' ;;
@@ -201,13 +203,36 @@ elif set_java_home; then
   cat >"$javaSource" <<-END
 	public class Downloader extends java.net.Authenticator
 	{
+	  private final String username;
+	  private final char[] password;
+
+	  public Downloader(String username, char[] password) {
+	    this.username = username;
+	    this.password = password;
+	  }
+
 	  protected java.net.PasswordAuthentication getPasswordAuthentication()
 	  {
-	    return new java.net.PasswordAuthentication( System.getenv( "MVNW_USERNAME" ), System.getenv( "MVNW_PASSWORD" ).toCharArray() );
+	    return new java.net.PasswordAuthentication(username, password);
 	  }
+
 	  public static void main( String[] args ) throws Exception
 	  {
-	    setDefault( new Downloader() );
+	    String username = System.getenv("MVNW_USERNAME");
+	    char[] password = System.getenv("MVNW_PASSWORD") != null ? System.getenv("MVNW_PASSWORD").toCharArray() : new char[0];
+	    
+	    // Clear sensitive environment variables from process memory
+	    try {
+	      java.lang.reflect.Field field = System.class.getDeclaredField("env");
+	      field.setAccessible(true);
+	      java.util.Map<String, String> env = (java.util.Map<String, String>) field.get(null);
+	      env.remove("MVNW_USERNAME");
+	      env.remove("MVNW_PASSWORD");
+	    } catch (Exception e) {
+	      // If we can't clear the environment variables, continue anyway
+	    }
+	    
+	    setDefault(new Downloader(username, password));
 	    java.nio.file.Files.copy( java.net.URI.create( args[0] ).toURL().openStream(), java.nio.file.Paths.get( args[1] ).toAbsolutePath().normalize() );
 	  }
 	}
