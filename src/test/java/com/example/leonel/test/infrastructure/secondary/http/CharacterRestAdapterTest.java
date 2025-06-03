@@ -50,7 +50,7 @@ public class CharacterRestAdapterTest {
         // When
         when(restTemplate.getForEntity(anyString(), eq(CharacterResDto.class)))
                 .thenReturn(responseEntity);
-        when(urlProperties.getUrlCharacter()).thenReturn("http://example.com/api/characters/");
+        when(urlProperties.getUrlCharacter()).thenReturn("https://rickandmortyapi.com/api/character/");
 
         Optional<Character> characterOptional = characterPort.getById(characterId);
 
@@ -80,12 +80,30 @@ public class CharacterRestAdapterTest {
         // When
         when(restTemplate.getForEntity(anyString(), eq(CharacterResDto.class)))
                 .thenThrow(new HttpClientErrorException(HttpStatus.NOT_FOUND));
+        when(urlProperties.getUrlCharacter()).thenReturn("https://rickandmortyapi.com/api/character/");
 
         Optional<Character> characterOptional = characterPort.getById(characterId);
 
         // Then
         assertTrue(characterOptional.isEmpty());
         verify(restTemplate, times(1)).getForEntity(anyString(), eq(CharacterResDto.class));
+    }
+    
+    @Test
+    void getById_InvalidUrl_ThrowsRuntimeException() {
+        // Given
+        long characterId = 1L;
+        
+        // When
+        when(urlProperties.getUrlCharacter()).thenReturn("http://malicious-site.com/api/character/");
+        
+        // Then
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            characterPort.getById(characterId);
+        });
+        
+        assertTrue(exception.getMessage().contains("Invalid URL format"));
+        verify(restTemplate, never()).getForEntity(anyString(), eq(CharacterResDto.class));
     }
 
     private CharacterResDto createMockCharacterResDto() {

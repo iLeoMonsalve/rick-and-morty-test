@@ -20,13 +20,19 @@ public class LocationRestAdapter implements LocationPort {
 
     @Override
     public Optional<Location> getLocation(String urlLocation) {
-
-        ResponseEntity<LocationResDto> responseEntity = restTemplate.getForEntity(urlLocation, LocationResDto.class);
-        if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
-            return Optional.of(this.transformToLocationDomain(responseEntity.getBody()));
+        try {
+            if (!com.example.leonel.test.infrastructure.util.UrlValidator.isValid(urlLocation)) {
+                throw new IllegalArgumentException("Invalid or potentially malicious URL: " + urlLocation);
+            }
+            
+            ResponseEntity<LocationResDto> responseEntity = restTemplate.getForEntity(urlLocation, LocationResDto.class);
+            if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
+                return Optional.of(this.transformToLocationDomain(responseEntity.getBody()));
+            }
+            return Optional.empty();
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid URL format: " + e.getMessage());
         }
-        return Optional.empty();
-
     }
 
     private Location transformToLocationDomain(LocationResDto locationResDto) {

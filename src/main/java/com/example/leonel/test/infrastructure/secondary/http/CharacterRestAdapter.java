@@ -26,7 +26,12 @@ public class CharacterRestAdapter implements CharacterPort {
     @Override
     public Optional<Character> getById(Long id) {
         try{
-            ResponseEntity<CharacterResDto> responseEntity = restTemplate.getForEntity(urlProperties.getUrlCharacter() + id, CharacterResDto.class);
+            String url = urlProperties.getUrlCharacter() + id;
+            if (!com.example.leonel.test.infrastructure.util.UrlValidator.isValid(url)) {
+                throw new IllegalArgumentException("Invalid or potentially malicious URL: " + url);
+            }
+            
+            ResponseEntity<CharacterResDto> responseEntity = restTemplate.getForEntity(url, CharacterResDto.class);
             if (responseEntity.getStatusCode() == HttpStatus.OK && responseEntity.getBody() != null) {
                 return Optional.of(this.transformToCharacter(responseEntity.getBody()));
             }
@@ -37,6 +42,8 @@ public class CharacterRestAdapter implements CharacterPort {
             }
 
             throw new RuntimeException("error fetching data for Character");
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("Invalid URL format: " + e.getMessage());
         }
     }
 
