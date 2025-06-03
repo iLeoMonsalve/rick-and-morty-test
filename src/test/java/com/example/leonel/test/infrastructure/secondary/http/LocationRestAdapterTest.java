@@ -34,7 +34,7 @@ public class LocationRestAdapterTest {
     @Test
     void getLocation_SuccessfulResponse_ReturnsLocation() {
         // Given
-        String urlLocation = "http://example.com/api/locations/1";
+        String urlLocation = "https://rickandmortyapi.com/api/location/1";
         LocationResDto mockLocationResDto = createMockLocationResDto();
         ResponseEntity<LocationResDto> responseEntity = new ResponseEntity<>(mockLocationResDto, HttpStatus.OK);
 
@@ -59,7 +59,7 @@ public class LocationRestAdapterTest {
     @Test
     void getLocation_NotFoundResponse_ReturnsEmptyOptional() {
         // given
-        String urlLocation = "http://example.com/api/locations/999";
+        String urlLocation = "https://rickandmortyapi.com/api/location/999";
 
         // when
         when(restTemplate.getForEntity(eq(urlLocation), eq(LocationResDto.class)))
@@ -72,6 +72,20 @@ public class LocationRestAdapterTest {
 
         // Verify restTemplate method was called
         verify(restTemplate, times(1)).getForEntity(eq(urlLocation), eq(LocationResDto.class));
+    }
+    
+    @Test
+    void getLocation_InvalidUrl_ThrowsRuntimeException() {
+        // Given
+        String urlLocation = "http://malicious-site.com/api/location/1";
+        
+        // Then
+        Exception exception = assertThrows(RuntimeException.class, () -> {
+            locationPort.getLocation(urlLocation);
+        });
+        
+        assertTrue(exception.getMessage().contains("Invalid URL format"));
+        verify(restTemplate, never()).getForEntity(anyString(), eq(LocationResDto.class));
     }
 
     private LocationResDto createMockLocationResDto() {
