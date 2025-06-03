@@ -38,6 +38,7 @@
 @SET PSModulePath=%__MVNW_PSMODULEP_SAVE%
 @SET __MVNW_PSMODULEP_SAVE=
 @SET __MVNW_ARG0_NAME__=
+# Clear sensitive environment variables before executing Maven
 @SET MVNW_USERNAME=
 @SET MVNW_PASSWORD=
 @IF NOT "%__MVNW_CMD__%"=="" (%__MVNW_CMD__% %*)
@@ -113,9 +114,21 @@ Write-Verbose "Couldn't find MAVEN_HOME, downloading and installing it ..."
 Write-Verbose "Downloading from: $distributionUrl"
 Write-Verbose "Downloading to: $TMP_DOWNLOAD_DIR/$distributionUrlName"
 
+# Create a secure approach for credentials
 $webclient = New-Object System.Net.WebClient
 if ($env:MVNW_USERNAME -and $env:MVNW_PASSWORD) {
-  $webclient.Credentials = New-Object System.Net.NetworkCredential($env:MVNW_USERNAME, $env:MVNW_PASSWORD)
+  # Create credentials using SecureString for password
+  $securePassword = ConvertTo-SecureString $env:MVNW_PASSWORD -AsPlainText -Force
+  $credential = New-Object System.Management.Automation.PSCredential($env:MVNW_USERNAME, $securePassword)
+  $webclient.Credentials = New-Object System.Net.NetworkCredential($credential.UserName, $credential.Password)
+  
+  # Clear sensitive environment variables from memory
+  try {
+    Remove-Item env:MVNW_USERNAME -ErrorAction SilentlyContinue
+    Remove-Item env:MVNW_PASSWORD -ErrorAction SilentlyContinue
+  } catch {
+    # Continue if we can't remove the environment variables
+  }
 }
 [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
 $webclient.DownloadFile($distributionUrl, "$TMP_DOWNLOAD_DIR/$distributionUrlName") | Out-Null
